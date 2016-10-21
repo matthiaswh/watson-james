@@ -1,8 +1,14 @@
 <template>
   <div class='container'>
     <h1 class='title is-1'>Watson</h1>
-    <h2></h2>
 
+    <p class="control">
+      <input
+        type="file"
+        id="file"
+        @change='loadData($event)'
+      />
+    </p>
     <p class="control">
       <a
         class="button is-primary"
@@ -177,6 +183,22 @@ export default {
   },
 
   methods: {
+
+    loadData (event) {
+      let reader = new FileReader()
+      reader.onload = this.onReaderLoad
+      reader.readAsText(event.target.files[0])
+    },
+
+    onReaderLoad (event) {
+      let obj = JSON.parse(event.target.result)
+      this.data = this.processData(obj)
+    },
+
+    loadItem () {
+      this.item = this.$localStorage.get('testkey', (v) => { console.log(v) })
+    },
+
     sortBy (key) {
       this.sortKey = key
       this.sortOrders[key] = this.sortOrders[key] * -1
@@ -187,13 +209,14 @@ export default {
 
       for (let i = 0; i < data.length; i++) {
         processedData.push({
-          'Date': new Date(data[i][0] * 1000),
-          'Start time': new Date(data[i][0] * 1000),
-          'End time': new Date(data[i][1] * 1000),
-          'Run time': Math.round((data[i][1] - data[i][0]) / 60),
-          'Projects': data[i][2],
-          'Id': data[i][3],
-          'Tags': _.map(data[i][4], (d) => { return '+' + d })
+          'Date': new Date(data[i][2] * 1000),
+          'Start time': new Date(data[i][2] * 1000),
+          'End time': new Date(data[i][3] * 1000),
+          'Run time': Math.round((data[i][3] - data[i][2]) / 60),
+          'Projects': data[i][1],
+          'Id': data[i][0],
+          'Tags': _.map(data[i][4], (d) => { return '+' + d }),
+          'Message': data[i][6]
         })
       }
 
