@@ -133,7 +133,7 @@ export default {
       if (filterKey) {
         let filters = filterKey.trim().split(/[\s]+/)
         data = _.filter(data, (d) => {
-          let res = false
+          let res = true
           let tag = true
           _.forIn(filters, (filter) => {
             // look up tag filters separately so we can do an AND search
@@ -141,7 +141,7 @@ export default {
               if (String(d['Tags']).toLowerCase().indexOf(filter) < 0) tag = false
             } else {
               _.forIn(searchColumns, (col) => {
-                if (String(d[col]).toLowerCase().indexOf(filter) > -1) res = true
+                if (String(d[col]).toLowerCase().indexOf(filter) < 0) res = false
               })
             }
           })
