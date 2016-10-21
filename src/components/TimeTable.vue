@@ -83,7 +83,7 @@ export default {
       'Tags'
     ]
     let searchColumns = [
-      'Projects', 'Tags'
+      'Projects'
     ]
     let sortOrders = {}
     columns.forEach(function (key) {
@@ -112,9 +112,8 @@ export default {
     // let rd = this.$localStorage.get('reportData')
     let rd = localStorage.getItem('reportData')
     rd = JSON.parse(rd)
-    console.log(rd)
 
-    if (rd) this.data = rd
+    if (rd) this.data = this.reProcessData(rd)
   },
 
   components: {
@@ -135,22 +134,19 @@ export default {
         let filters = filterKey.trim().split(/[\s]+/)
         data = _.filter(data, (d) => {
           let res = false
+          let tag = true
           _.forIn(filters, (filter) => {
-            _.forIn(searchColumns, (col) => {
-              if (String(d[col]).toLowerCase().indexOf(filter) > -1) res = true
-            })
+            // look up tag filters separately so we can do an AND search
+            if (filter.indexOf('+') === 0) {
+              if (String(d['Tags']).toLowerCase().indexOf(filter) < 0) tag = false
+            } else {
+              _.forIn(searchColumns, (col) => {
+                if (String(d[col]).toLowerCase().indexOf(filter) > -1) res = true
+              })
+            }
           })
-          return res
+          return res && tag
         })
-        // data = data.filter((row) => {
-        //   return _.keys(row).some((key) => {
-        //     let results = []
-        //     _.forIn(filters, (filter) => {
-        //       results.push(_.includes(searchColumns, key) && String(row[key]).toLowerCase().indexOf(filterKey) > -1)
-        //     })
-        //     return results
-        //   })
-        // })
       }
 
       if (sortKey) {
@@ -235,6 +231,17 @@ export default {
       localStorage.setItem('reportData', JSON.stringify(processedData))
 
       return processedData
+    },
+
+    reProcessData (data) {
+      /* handle any inconsistencies when loading data from localstorage */
+      _.forIn(data, (d) => {
+        d['Date'] = moment(d['Date']).toDate()
+        d['Start time'] = moment(d['Start time']).toDate()
+        d['End time'] = moment(d['End time']).toDate()
+      })
+
+      return data
     },
 
     loadSampleData () {
