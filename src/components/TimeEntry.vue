@@ -1,8 +1,8 @@
 <template>
   <tr>
-    <td>{{ entry['Date']  }}</td>
-    <td>{{ entry['Start time'] }}</td>
-    <td>{{ entry['End time'] }}</td>
+    <td>{{ showDate(entry['Date'])  }}</td>
+    <td>{{ showTime(entry['Start time']) }}</td>
+    <td>{{ showTime(entry['End time']) }}</td>
     <td>{{ entry['Run time'] }}</td>
     <td>{{ entry['Projects'] }}</td>
     <td v-if='entry["Tags"]'>
@@ -34,6 +34,14 @@ export default {
   methods: {
     dTime (t) {
       return moment(t * 1000).format('HH:mm')
+    },
+
+    showDate (d) {
+      return moment(d).format('YYYY-MM-DD')
+    },
+
+    showTime (t) {
+      return moment(t).format('HH:mm')
     }
   }
 }

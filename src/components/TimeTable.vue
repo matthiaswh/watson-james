@@ -1,5 +1,5 @@
 <template>
-  <div class='hello container'>
+  <div class='container'>
     <h1 class='title is-1'>Watson</h1>
     <h2></h2>
 
@@ -16,6 +16,14 @@
         v-model='filterKey'
         placeholder='filter'
       >
+    </p>
+
+    <p class="control">
+      <flatpickr v-model='startDate' @update='updateStartDate'></flatpickr>
+    </p>
+
+    <p class="control">
+      <flatpickr v-model='endDate' @update='updateEndDate'></flatpickr>
     </p>
     
     <table class='table is-bordered is-striped'>
@@ -52,6 +60,7 @@
 <script>
 import moment from 'moment'
 import _ from 'lodash'
+import Flatpickr from 'vue-flatpickr/vue-flatpickr-default.vue'
 
 import TimeEntry from './TimeEntry.vue'
 import rawData from '../../sample-data/data'
@@ -81,12 +90,15 @@ export default {
       searchColumns: searchColumns,
       sortOrders: sortOrders,
       sortKey: '',
-      filterKey: ''
+      filterKey: '',
+      startDate: null, // null
+      endDate: null
     }
   },
 
   components: {
-    'time-entry': TimeEntry
+    'time-entry': TimeEntry,
+    'flatpickr': Flatpickr
   },
 
   computed: {
@@ -114,6 +126,20 @@ export default {
         })
       }
 
+      if (this.startDate) {
+        let startDate = this.startDate
+        data = _.filter(data, (o) => {
+          return o['Date'] > startDate
+        })
+      }
+
+      if (this.endDate) {
+        let endDate = this.endDate
+        data = _.filter(data, (o) => {
+          return o['Date'] <= moment(endDate).add(1, 'd').toDate() // set to midnight, so move to midnight the next day
+        })
+      }
+
       return data
     },
 
@@ -125,6 +151,14 @@ export default {
         t += this.filteredData[i]['Run time']
       }
       return (t / 60).toFixed(1)
+    },
+
+    showDate (d) {
+      return moment(d).format('YYYY-MM-DD')
+    },
+
+    showTime (t) {
+      return moment(t).format('HH:mm')
     }
   },
 
@@ -139,9 +173,9 @@ export default {
 
       for (let i = 0; i < data.length; i++) {
         processedData.push({
-          'Date': moment(new Date(data[i][0] * 1000)).format('YYYY-MM-DD'),
-          'Start time': moment(data[i][0] * 1000).format('HH:mm'),
-          'End time': moment(data[i][1] * 1000).format('HH:mm'),
+          'Date': new Date(data[i][0] * 1000),
+          'Start time': new Date(data[i][0] * 1000),
+          'End time': new Date(data[i][1] * 1000),
           'Run time': Math.round((data[i][1] - data[i][0]) / 60),
           'Projects': data[i][2],
           'Id': data[i][3],
@@ -154,6 +188,14 @@ export default {
 
     loadSampleData () {
       this.data = this.processData(rawData)
+    },
+
+    updateStartDate (val) {
+      this.startDate = moment(val).toDate()
+    },
+
+    updateEndDate (val) {
+      this.endDate = moment(val).toDate()
     }
   }
 }
@@ -161,24 +203,6 @@ export default {
 
 <!-- Add 'scoped' attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-
-a {
-  color: #42b983;
-}
-
 th.active {
   background: #ff0000;
 }

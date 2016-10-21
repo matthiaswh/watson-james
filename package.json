@@ -15,7 +15,8 @@
   "dependencies": {
     "lodash": "^4.16.4",
     "moment": "^2.15.1",
-    "vue": "^2.0.1"
+    "vue": "^2.0.1",
+    "vue-flatpickr": "^2.0.2"
   },
   "devDependencies": {
     "autoprefixer": "^6.4.0",
