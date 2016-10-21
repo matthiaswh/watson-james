@@ -102,6 +102,21 @@ export default {
     }
   },
 
+  localStorage: {
+    reportData: {
+      type: Array
+    }
+  },
+
+  created () {
+    // let rd = this.$localStorage.get('reportData')
+    let rd = localStorage.getItem('reportData')
+    rd = JSON.parse(rd)
+    console.log(rd)
+
+    if (rd) this.data = rd
+  },
+
   components: {
     'time-entry': TimeEntry,
     'flatpickr': Flatpickr
@@ -195,10 +210,6 @@ export default {
       this.data = this.processData(obj)
     },
 
-    loadItem () {
-      this.item = this.$localStorage.get('testkey', (v) => { console.log(v) })
-    },
-
     sortBy (key) {
       this.sortKey = key
       this.sortOrders[key] = this.sortOrders[key] * -1
@@ -219,6 +230,9 @@ export default {
           'Message': data[i][6]
         })
       }
+
+      // this.$localStorage.set('reportData', JSON.stringify(processedData))
+      localStorage.setItem('reportData', JSON.stringify(processedData))
 
       return processedData
     },

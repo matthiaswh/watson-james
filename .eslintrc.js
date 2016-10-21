@@ -21,6 +21,7 @@ module.exports = {
   },
 
   globals: {
-    "FileReader": true
+    "FileReader": true,
+    "localStorage": true
   }
 }
