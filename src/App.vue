@@ -6,13 +6,11 @@
 </template>
 
 <script>
-import Hello from './components/Hello'
 import TimeTable from './components/TimeTable.vue'
 
 export default {
   name: 'app',
   components: {
-    Hello,
     TimeTable
   }
 }

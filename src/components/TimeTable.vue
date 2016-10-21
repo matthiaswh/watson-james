@@ -111,11 +111,25 @@ export default {
       let order = this.sortOrders[sortKey] || 1
 
       if (filterKey) {
-        data = data.filter((row) => {
-          return _.keys(row).some((key) => {
-            return _.includes(searchColumns, key) && String(row[key]).toLowerCase().indexOf(filterKey) > -1
+        let filters = filterKey.trim().split(/[\s]+/)
+        data = _.filter(data, (d) => {
+          let res = false
+          _.forIn(filters, (filter) => {
+            _.forIn(searchColumns, (col) => {
+              if (String(d[col]).toLowerCase().indexOf(filter) > -1) res = true
+            })
           })
+          return res
         })
+        // data = data.filter((row) => {
+        //   return _.keys(row).some((key) => {
+        //     let results = []
+        //     _.forIn(filters, (filter) => {
+        //       results.push(_.includes(searchColumns, key) && String(row[key]).toLowerCase().indexOf(filterKey) > -1)
+        //     })
+        //     return results
+        //   })
+        // })
       }
 
       if (sortKey) {
@@ -179,7 +193,7 @@ export default {
           'Run time': Math.round((data[i][1] - data[i][0]) / 60),
           'Projects': data[i][2],
           'Id': data[i][3],
-          'Tags': data[i][4]
+          'Tags': _.map(data[i][4], (d) => { return '+' + d })
         })
       }
 
