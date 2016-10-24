@@ -9,6 +9,7 @@ var baseConfig = require('../../build/webpack.base.conf')
 var utils = require('../../build/utils')
 var webpack = require('webpack')
 var projectRoot = path.resolve(__dirname, '../../')
+var srcContext = require.context('../../src', true, /^\.\/(?!main\.js$).+\.(js|vue)$/i)
 
 var webpackConfig = merge(baseConfig, {
   // use inline sourcemap for karma-sourcemap-loader
