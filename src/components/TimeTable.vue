@@ -80,7 +80,8 @@ export default {
       'End time',
       'Run time',
       'Projects',
-      'Tags'
+      'Tags',
+      'Message'
     ]
     let searchColumns = [
       'Projects'

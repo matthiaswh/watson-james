@@ -10,6 +10,7 @@
         {{ tag }}
       </span>
     </td>
+    <td style='width: 25%'>{{ entry['Message'] }}</td>
   </tr>
 </template>
 
