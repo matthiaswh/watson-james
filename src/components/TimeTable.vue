@@ -31,35 +31,77 @@
     <p class="control">
       <flatpickr v-model='endDate' @update='updateEndDate'></flatpickr>
     </p>
+
+    <p class="control">
+      <input type="radio" value='default' id='default-view' v-model='view'>
+      <label for="default-view">Default</label>
+    </p>
+    <p class="control">
+      <input type="radio" value='tags' id='tag-view' v-model='view'>
+      <label for="tag-view">Tags</label>
+    </p>
+
+    <span class="message" v-if='view === "tags"'>Time entries can be tagged with multiple tags, thus the total time reported by tag view might be more than the actual total time.</span>
     
-    <table class='table is-bordered is-striped'>
-      <thead>
-        <tr>
-          <th
-            v-for='c in columns'
-            @click="sortBy(c)"
-            :class="{ active: sortKey == c }"
-          >
-            {{ c }}
-            <span class="arrow" :class="sortOrders[c] > 0 ? 'asc' : 'dsc'">
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <time-entry
-          v-for='entry in filteredData'
-          :entry='entry'
-        ></time-entry>
-      </tbody>
-      <tfoot>
-        <tr>
-          <td></td>
-          <td></td>
-          <td>Total time:</td>
-          <td>{{ totalTime }} hours</td>
-        </tr>
-      </tfoot>
-    </table>
+    <template v-if='view === "tags"'>
+      <table class='table is-bordered is-striped'>
+        <thead>
+          <tr>
+            <th
+              v-for='c in tagColumns'
+              @click="sortBy(c)"
+              :class="{ active: sortKey == c }"
+            >
+              {{ c }}
+              <span class="arrow" :class="sortOrders[c] > 0 ? 'asc' : 'dsc'">
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tag-entry
+            v-for='entry in filteredData'
+            :entry='entry'
+          ></tag-entry>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td></td>
+            <td>Total time:</td>
+            <td>{{ totalTime }} hours</td>
+          </tr>
+        </tfoot>
+      </table>
+    </template>
+    <template v-else>
+      <table class='table is-bordered is-striped'>
+        <thead>
+          <tr>
+            <th
+              v-for='c in columns'
+              @click="sortBy(c)"
+              :class="{ active: sortKey == c }"
+            >
+              {{ c }}
+              <span class="arrow" :class="sortOrders[c] > 0 ? 'asc' : 'dsc'">
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <time-entry
+            v-for='entry in filteredData'
+            :entry='entry'
+          ></time-entry>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td></td>
+            <td></td>
+            <td>Total time:</td>
+            <td>{{ totalTime }} hours</td>
+          </tr>
+        </tfoot>
+      </table>
+    </template>
   </div>
 </template>
 
@@ -69,6 +111,7 @@ import _ from 'lodash'
 import Flatpickr from 'vue-flatpickr/vue-flatpickr-default.vue'
 
 import TimeEntry from './TimeEntry.vue'
+import TagEntry from './TagEntry.vue'
 import rawData from '../../sample-data/data'
 
 export default {
@@ -83,6 +126,11 @@ export default {
       'Tags',
       'Message'
     ]
+    let tagColumns = [
+      'Entries',
+      'Run Time',
+      'Tag'
+    ]
     let searchColumns = [
       'Projects'
     ]
@@ -94,12 +142,14 @@ export default {
     return {
       data: [],
       columns: columns,
+      tagColumns: tagColumns,
       searchColumns: searchColumns,
       sortOrders: sortOrders,
       sortKey: '',
       filterKey: '',
       startDate: null, // null
-      endDate: null
+      endDate: null,
+      view: 'default'
     }
   },
 
@@ -119,6 +169,7 @@ export default {
 
   components: {
     'time-entry': TimeEntry,
+    'tag-entry': TagEntry,
     'flatpickr': Flatpickr
   },
 
@@ -147,6 +198,35 @@ export default {
             }
           })
           return res && tag
+        })
+      }
+
+      if (this.view === 'tags') {
+        let tagData = {'Untagged': {'Run time': 0, 'Entries': 0, 'Tags': 'Untagged'}}
+        _.forIn(data, (entry) => {
+          if (entry['Tags'] && entry['Tags'].length > 0) {
+            _.forIn(entry['Tags'], (tag) => {
+              if (tagData[tag]) {
+                tagData[tag]['Run time'] += parseInt(entry['Run time'])
+                tagData[tag]['Entries'] += 1
+              } else {
+                tagData[tag] = {}
+                tagData[tag]['Tags'] = tag
+                tagData[tag]['Run time'] = parseInt(entry['Run time'])
+                tagData[tag]['Entries'] = 1
+              }
+            })
+          } else {
+            tagData['Untagged']['Run time'] += parseInt(entry['Run time'])
+            tagData['Untagged']['Entries'] += 1
+          }
+        })
+
+        console.log(tagData)
+        data = []
+
+        _.forIn(tagData, (entry) => {
+          data.push(entry)
         })
       }
 
